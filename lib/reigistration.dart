@@ -8,16 +8,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({Key? key}) : super(key: key);
 
   @override
-  State<LoginPage> createState() => _Login();
+  State<RegisterPage> createState() => _Register();
 }
 
-class _Login extends State<LoginPage> {
+class _Register extends State<RegisterPage> {
   FirebaseAuth auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
+  final username = TextEditingController();
   final email = TextEditingController();
   final password = TextEditingController();
   bool _loading = false;
@@ -25,11 +26,20 @@ class _Login extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: _loading ? Loading() : Center(
+    return Scaffold(
+      appBar: AppBar(title: const Text("Register an account!")),
+      body: _loading ? Loading() : Center(
       child: Form(
         key: _formKey,
         child: Column(
           children: [
+            TextFormField(controller: username,
+            validator: (String? text) {
+              if (text == null || text.isEmpty)
+                return "You can't leave this field blank!";
+              return null;
+            }),
+
             TextFormField(controller: email,
             validator: (String? text) {
               if (text == null || text.isEmpty)
@@ -46,9 +56,22 @@ class _Login extends State<LoginPage> {
               return null;
             }),
 
-            ElevatedButton(onPressed: () {}, child: const Text("Log In"),),
-            ElevatedButton(onPressed: () {}, child: const Text("Register"),),
-            ElevatedButton(onPressed: () {}, child: const Text("Sign in with Google"),),
+            TextFormField(
+            validator: (String? text) {
+              if (text == null || text.length < 8)
+                return "Your password must be at least 8 characters!";
+              else if (text != password.text) {
+                return "Your passwords don't match!!!";
+              }
+              return null;
+            }),
+
+            ElevatedButton(onPressed: () {
+              setState(() {
+                _loading = true;
+                register(context);
+              }
+            }, child: const Text("Register"),),
 
           ],
         )
@@ -56,13 +79,13 @@ class _Login extends State<LoginPage> {
     ));
   }
 
-  void login(BuildContext context) async {
+  void register(BuildContext context) async {
     if(_formKey.currentState!.validate()) {
       try {
         await auth.signInWithEmailAndPassword(email: email.text, password: password.text);
       } on FirebaseAuthException catch(e) {
         if(e.code == "wrong-email" || e.code == "wrong-password")
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Incorrect login information!!!")));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Incorrect register information!!!")));
       } catch(e) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
       }
