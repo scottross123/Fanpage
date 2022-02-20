@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fanpage/reigistration.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 //import 'firebase_options.dart';
@@ -17,6 +19,7 @@ class LoginPage extends StatefulWidget {
 
 class _Login extends State<LoginPage> {
   FirebaseAuth auth = FirebaseAuth.instance;
+  FirebaseFirestore db = FirebaseFirestore.instance;
   final _formKey = GlobalKey<FormState>();
   final email = TextEditingController();
   final password = TextEditingController();
@@ -30,24 +33,49 @@ class _Login extends State<LoginPage> {
         key: _formKey,
         child: Column(
           children: [
-            TextFormField(controller: email,
-            validator: (String? text) {
-              if (text == null || text.isEmpty)
-                return "You can't leave this field blank!";
-              else if (!text.contains('@'))
-                return "That is not a valid email address!";
-              return null;
-            }),
+            TextFormField(
+              controller: email,
+              validator: (String? text) {
+                if (text == null || text.isEmpty)
+                  return "You can't leave this field blank!";
+                else if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]")
+              .hasMatch(text))
+                  return "That is not a valid email address!";
+                return null;
+              },
+              
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.mail),
+                hintText: "Email",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+            ),
             
-            TextFormField(controller: password,
-            validator: (String? text) {
-              if (text == null || text.length < 8)
-                return "Your password must be at least 8 characters!";
-              return null;
-            }),
+            TextFormField(
+              controller: password,
+              obscureText: true,
+              validator: (String? text) {
+                if (text == null || text.length < 8)
+                  return "Your password must be at least 8 characters!";
+                return null;
+              },
 
-            ElevatedButton(onPressed: () {}, child: const Text("Log In"),),
-            ElevatedButton(onPressed: () {}, child: const Text("Register"),),
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.key),
+                hintText: "Password",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+            ),
+
+            ElevatedButton(onPressed: () {
+              _loading = true;
+              login(context);
+            }, child: const Text("Log In"),),
+
+            ElevatedButton(onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (context)=>const RegisterPage()));    
+            }, child: const Text("Register"),),
+
             ElevatedButton(onPressed: () {}, child: const Text("Sign in with Google"),),
 
           ],

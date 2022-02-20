@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fanpage/database_service.dart';
 import 'package:flutter/material.dart';
+import 'package:fanpage/login.dart';
 import 'package:firebase_core/firebase_core.dart';
 //import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,6 +20,7 @@ class RegisterPage extends StatefulWidget {
 
 class _Register extends State<RegisterPage> {
   FirebaseAuth auth = FirebaseAuth.instance;
+  FirebaseFirestore db = FirebaseFirestore.instance;
   final _formKey = GlobalKey<FormState>();
   final username = TextEditingController();
   final email = TextEditingController();
@@ -33,46 +37,81 @@ class _Register extends State<RegisterPage> {
         key: _formKey,
         child: Column(
           children: [
-            TextFormField(controller: username,
-            validator: (String? text) {
-              if (text == null || text.isEmpty)
-                return "You can't leave this field blank!";
-              return null;
-            }),
+            TextFormField(
+              controller: username,
+              validator: (String? text) {
+                if (text == null || text.isEmpty)
+                  return "You can't leave this field blank!";
+                else if (DatabaseService.usernames.contains(text))
+                  return "Username already exists!!! Pick a different one.";
+                return null;
+              },
+
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.person),
+                hintText: "Username",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+            ),
 
             TextFormField(controller: email,
-            validator: (String? text) {
-              if (text == null || text.isEmpty)
-                return "You can't leave this field blank!";
-              else if (!text.contains('@'))
-                return "That is not a valid email address!";
-              return null;
-            }),
+              validator: (String? text) {
+                if (text == null || text.isEmpty)
+                  return "You can't leave this field blank!";
+                else if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]")
+              .hasMatch(text))
+                  return "That is not a valid email address!";
+                return null;
+              },
+
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.mail),
+                hintText: "Email",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+              ),              
+            ),
             
-            TextFormField(controller: password,
-            validator: (String? text) {
-              if (text == null || text.length < 8)
-                return "Your password must be at least 8 characters!";
-              return null;
-            }),
+            TextFormField(
+              controller: password,
+              obscureText: true,
+              validator: (String? text) {
+                if (text == null || text.length < 8)
+                  return "Your password must be at least 8 characters!";
+                return null;
+              },
+
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.key),
+                hintText: "Password",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+            ),
 
             TextFormField(
-            validator: (String? text) {
-              if (text == null || text.length < 8)
-                return "Your password must be at least 8 characters!";
-              else if (text != password.text) {
-                return "Your passwords don't match!!!";
-              }
-              return null;
-            }),
+              obscureText: true,
+              validator: (String? text) {
+                if (text == null || text.length < 8)
+                  return "Your password must be at least 8 characters!";
+                else if (text != password.text) {
+                  return "Your passwords don't match!!!";
+                }
+                return null;
+              },
+
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.key),
+                hintText: "Confirm Password",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+            ),
 
             ElevatedButton(onPressed: () {
               setState(() {
                 _loading = true;
                 register(context);
-              }
-            }, child: const Text("Register"),),
-
+              });
+            }, 
+            child: const Text("Register"),)
           ],
         )
       )
@@ -82,23 +121,28 @@ class _Register extends State<RegisterPage> {
   void register(BuildContext context) async {
     if(_formKey.currentState!.validate()) {
       try {
-        await auth.signInWithEmailAndPassword(email: email.text, password: password.text);
+        await auth.createUserWithEmailAndPassword(email: email.text, password: password.text);
       } on FirebaseAuthException catch(e) {
-        if(e.code == "wrong-email" || e.code == "wrong-password")
+        if(e.code == "no-email" || e.code == "wrong-password")
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Incorrect register information!!!")));
       } catch(e) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     }
+
+    try {
+      if (auth.currentUser != null) {
+        await db.collection("users").doc(auth.currentUser!.uid).set(
+          {
+            "username": username.text,
+            "role": "USER",
+            "email": email.text 
+          }
+        );
+      }
+    } on FirebaseException catch(e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message ?? "Some error occured!! What did you do?!")));
+    }
   }
 }
 
-class Loading extends StatelessWidget {
-  const Loading({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(child: CircularProgressIndicator());
-  }
-  
-}
