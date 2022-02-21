@@ -122,6 +122,8 @@ class _Register extends State<RegisterPage> {
     if(_formKey.currentState!.validate()) {
       try {
         await auth.createUserWithEmailAndPassword(email: email.text, password: password.text);
+        Navigator.of(context).push(MaterialPageRoute(builder: (context)=>const LoginPage()));
+        _loading = false;
       } on FirebaseAuthException catch(e) {
         if(e.code == "no-email" || e.code == "wrong-password")
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Incorrect register information!!!")));

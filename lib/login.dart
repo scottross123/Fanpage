@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fanpage/reigistration.dart';
+import 'package:fanpage/home.dart';
+import 'package:fanpage/registration.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 //import 'firebase_options.dart';
@@ -88,6 +89,8 @@ class _Login extends State<LoginPage> {
     if(_formKey.currentState!.validate()) {
       try {
         await auth.signInWithEmailAndPassword(email: email.text, password: password.text);
+        Navigator.of(context).push(MaterialPageRoute(builder: (context)=>const Home()));
+        _loading = false;
       } on FirebaseAuthException catch(e) {
         if(e.code == "wrong-email" || e.code == "wrong-password")
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Incorrect login information!!!")));

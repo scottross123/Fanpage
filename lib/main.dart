@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Fanpage',
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        primarySwatch: Colors.deepPurple
       ),
       home: LoginPage(),
     );
