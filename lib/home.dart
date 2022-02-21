@@ -62,7 +62,7 @@ class _HomeState extends State<Home> {
   void addPost(BuildContext) async {
     await db.collection("post").add(
       {
-        "message": msg.text,
+        "message": "MESSAGE",
         "timestamp": DateTime.now().millisecondsSinceEpoch,
         "name": FirebaseAuth.instance.currentUser!.displayName,
         "userID": FirebaseAuth.instance.currentUser!.uid,
