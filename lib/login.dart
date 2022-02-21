@@ -89,7 +89,7 @@ class _Login extends State<LoginPage> {
     if(_formKey.currentState!.validate()) {
       try {
         await auth.signInWithEmailAndPassword(email: email.text, password: password.text);
-        Navigator.of(context).push(MaterialPageRoute(builder: (context)=>const Home()));
+        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=>const Home()));
         _loading = false;
       } on FirebaseAuthException catch(e) {
         if(e.code == "wrong-email" || e.code == "wrong-password")

@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fanpage/database_service.dart';
 import 'package:fanpage/login.dart';
+import 'package:fanpage/user.dart';
+import 'package:fanpage/user_list.dart';
+import 'package:fanpage/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 //import 'firebase_options.dart';
@@ -22,12 +25,13 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    print(FirebaseAuth.instance.currentUser);
+    print(DatabaseService.userMap[auth.currentUser!.uid]!.role);
     return Scaffold(
-      floatingActionButton: DatabaseService.userMap[auth.currentUser!.uid]!.role == "ADMIN" ? FloatingActionButton(onPressed: () {
-        addPost();
-      },
-
-      child: const Text("ADMIN POST"),
+      floatingActionButton: DatabaseService.userMap[auth.currentUser!.uid]!.role == "ADMIN" ? FloatingActionButton.extended(
+        icon: const Icon(Icons.add), 
+        label: const Text("ADMIN POST"),
+        onPressed: () { addPost(); },
       ) : null,
       body: StreamBuilder<QuerySnapshot> (
         stream: posts.snapshots(),

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 //import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+import 'database_service.dart';
 //import 'package:provider/provider.dart';  
 //import 'src/authentication.dart'; 
 //import 'src/widgets.dart';     
@@ -10,13 +12,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 void main() async {
   WidgetsFlutterBinding();
   await Firebase.initializeApp();
+  DatabaseService();
   runApp(const MyApp());
-}
-
-FirebaseAuth auth = FirebaseAuth.instance;
-
-class AppState extends ChangeNotifier {
-
 }
 
 class MyApp extends StatelessWidget {
