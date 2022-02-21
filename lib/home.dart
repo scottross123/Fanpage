@@ -10,7 +10,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:provider/provider.dart';  
 //import 'src/authentication.dart'; 
-//import 'src/widgets.dart';     
+//import 'src/widgets.dart';
+import 'package:fanpage/post.dart';     
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -23,6 +24,7 @@ class _HomeState extends State<Home> {
   FirebaseFirestore db = FirebaseFirestore.instance;
   CollectionReference posts = FirebaseFirestore.instance.collection("posts");
 
+
   @override
   Widget build(BuildContext context) {
     print(FirebaseAuth.instance.currentUser);
@@ -31,8 +33,9 @@ class _HomeState extends State<Home> {
       floatingActionButton: DatabaseService.userMap[auth.currentUser!.uid]!.role == "ADMIN" ? FloatingActionButton.extended(
         icon: const Icon(Icons.add), 
         label: const Text("ADMIN POST"),
-        onPressed: () { addPost(); },
+        onPressed: () { addPost(context); },
       ) : null,
+      
       body: StreamBuilder<QuerySnapshot> (
         stream: posts.snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -51,18 +54,21 @@ class _HomeState extends State<Home> {
           }).toList());
         },
       ),
+      
+   
     );
   } 
 
-  void addPost() async {
+  void addPost(BuildContext) async {
     await db.collection("post").add(
       {
-        "message": "MESSAGE",
+        "message": msg.text,
         "timestamp": DateTime.now().millisecondsSinceEpoch,
         "name": FirebaseAuth.instance.currentUser!.displayName,
         "userID": FirebaseAuth.instance.currentUser!.uid,
       }
     );
+    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>const MakePost()));
   }
 }
 
